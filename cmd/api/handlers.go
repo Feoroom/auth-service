@@ -14,7 +14,7 @@ func (app *application) createUserHandler(w http.ResponseWriter, r *http.Request
 	var req models.UserReq
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		log.Println(err)
+		app.badRequest(w, r, err)
 		return
 	}
 
@@ -25,13 +25,14 @@ func (app *application) createUserHandler(w http.ResponseWriter, r *http.Request
 
 	err := app.Users.CreateUser(user)
 	if err != nil {
-		log.Println(err)
+		app.internalServerError(w, r, err)
 		return
 	}
 
 	resp, err := json.MarshalIndent(user, "", "\t")
 	if err != nil {
-		log.Println(err)
+		app.internalServerError(w, r, err)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -51,19 +52,19 @@ func (app *application) createTokensHandler(w http.ResponseWriter, r *http.Reque
 
 	user, err := app.Users.GetUser(id)
 	if err != nil {
-		http.Error(w, "пользователя с таким id несуществует", http.StatusBadRequest)
+		app.notFound(w, r)
 		return
 	}
 
 	accessToken, accessClaims, err := app.JWT.CreateToken(id, ip, user.Email, 30*time.Minute)
 	if err != nil {
-		log.Println(err)
+		app.internalServerError(w, r, err)
 		return
 	}
 
 	refreshTokenHash, refreshToken, refreshClaims, err := app.JWT.CreateRefreshToken(id, ip, user.Email)
 	if err != nil {
-		log.Println(err)
+		app.internalServerError(w, r, err)
 		return
 	}
 
@@ -75,7 +76,7 @@ func (app *application) createTokensHandler(w http.ResponseWriter, r *http.Reque
 	})
 
 	if err != nil {
-		log.Println(err)
+		app.internalServerError(w, r, err)
 		return
 	}
 
@@ -89,7 +90,8 @@ func (app *application) createTokensHandler(w http.ResponseWriter, r *http.Reque
 
 	respJson, err := json.MarshalIndent(resp, "", "\t")
 	if err != nil {
-		log.Println(err)
+		app.internalServerError(w, r, err)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -102,26 +104,25 @@ func (app *application) renewAccessTokenHandler(w http.ResponseWriter, r *http.R
 	var req tokens.RenewAccessTokenReq
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		log.Println(err)
+		app.badRequest(w, r, err)
 		return
 	}
 
 	ip, err := models.GetIP(r)
 	if err != nil {
-		log.Println(err)
+		app.internalServerError(w, r, err)
 		return
 	}
 
 	refreshClaims, err := app.JWT.VerifyToken(req.RefreshToken)
 	if err != nil {
-		log.Println(err)
+		app.internalServerError(w, r, err)
 		return
 	}
 
 	user, err := app.Users.GetUser(refreshClaims.ID)
 	if err != nil {
-		// Нужно по другому отловить то, что токен является невалидным
-		http.Error(w, "некорректный токен", http.StatusBadRequest)
+		app.notFound(w, r)
 		return
 	}
 
@@ -130,24 +131,25 @@ func (app *application) renewAccessTokenHandler(w http.ResponseWriter, r *http.R
 	if refreshClaims.UserIP != ip {
 		err = app.Mailer.Send(user.Email, "warning.gohtml", user.Username)
 		if err != nil {
-			log.Println(err)
+			app.internalServerError(w, r, err)
+			return
 		}
 	}
 
 	session, err := app.Sessions.GetSession(refreshClaims.ID)
 	if err != nil {
-		log.Println(err)
+		app.notFound(w, r)
 		return
 	}
 
 	if session.UserID != refreshClaims.ID {
-		log.Println("некорректная сессия")
+		app.badRequest(w, r, err)
 		return
 	}
 
 	accessToken, accessClaims, err := app.JWT.CreateToken(refreshClaims.ID, ip, refreshClaims.Subject, 30*time.Minute)
 	if err != nil {
-		http.Error(w, "неудалось создать токен", http.StatusInternalServerError)
+		app.internalServerError(w, r, err)
 		return
 	}
 
@@ -158,7 +160,8 @@ func (app *application) renewAccessTokenHandler(w http.ResponseWriter, r *http.R
 
 	respJson, err := json.MarshalIndent(resp, "", "\t")
 	if err != nil {
-		log.Println(err)
+		app.internalServerError(w, r, err)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
