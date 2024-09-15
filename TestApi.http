@@ -1,0 +1,19 @@
+POST localhost:8000/users
+Content-Type: application/json
+
+{
+  "username": "Danil",
+  "email": "authEmail2@box.com"
+}
+
+### Получение Access и Refresh токенов по UUID пользователя
+GET localhost:8000/tokens/get/3358655d-3109-4709-9ec9-315071de1177
+Content-Type: application/json
+
+### Refresh токенов
+POST localhost:8000/tokens/refresh
+Content-Type: application/json
+
+{
+  "refresh_token": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJJRCI6IjMzNTg2NTVkLTMxMDktNDcwOS05ZWM5LTMxNTA3MWRlMTE3NyIsIlVzZXJJUCI6IjEyNy4wLjAuMSIsInN1YiI6ImF1dGhFbWFpbDJAYm94LmNvbSIsImV4cCI6MTcyNjQ5ODg3OSwiaWF0IjoxNzI2NDEyNDc5LCJqdGkiOiJjZDg5ODcwYS0xMDgyLTRkYmYtYjViYS01N2EzZDZlYTc1ZjIifQ.VAmNad_pEUtZ88NiQdQszncWsvj8w7n_uNYdu9ACTACmYJwZ0rkVIDC6gl8K9V_t4H4PLHDFb5axqMLnz4vdmg"
+}
