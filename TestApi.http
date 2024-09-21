@@ -3,11 +3,11 @@ Content-Type: application/json
 
 {
   "username": "Danil",
-  "email": "authEmail2@box.com"
+  "email": "authEmail3@box.com"
 }
 
 ### Получение Access и Refresh токенов по UUID пользователя
-GET localhost:8000/tokens/get/3358655d-3109-4709-9ec9-315071de1177
+GET localhost:8000/tokens/get/0b9ef355-6434-4c49-bfbc-b4064c4268b6
 Content-Type: application/json
 
 ### Refresh токенов
@@ -17,3 +17,5 @@ Content-Type: application/json
 {
   "refresh_token": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJJRCI6IjMzNTg2NTVkLTMxMDktNDcwOS05ZWM5LTMxNTA3MWRlMTE3NyIsIlVzZXJJUCI6IjEyNy4wLjAuMSIsInN1YiI6ImF1dGhFbWFpbDJAYm94LmNvbSIsImV4cCI6MTcyNjQ5ODg3OSwiaWF0IjoxNzI2NDEyNDc5LCJqdGkiOiJjZDg5ODcwYS0xMDgyLTRkYmYtYjViYS01N2EzZDZlYTc1ZjIifQ.VAmNad_pEUtZ88NiQdQszncWsvj8w7n_uNYdu9ACTACmYJwZ0rkVIDC6gl8K9V_t4H4PLHDFb5axqMLnz4vdmg"
 }
+
+
